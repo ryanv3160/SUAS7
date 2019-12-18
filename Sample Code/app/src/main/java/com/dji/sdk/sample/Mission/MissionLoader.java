@@ -1,0 +1,99 @@
+/**
+ * Class MissionLoader
+ * Description : Class serves to load the JSON file from the SD card,
+ * parse the file, error check the file, report errors
+ *
+ * Author : Ryan Vacca
+ **/
+
+// TODO Drew:
+
+// Notes and suggestions
+// TODO Need to report errors
+// 1) No Sim card detected
+// 2) Cant read Sim card
+
+package com.dji.sdk.sample.Mission;
+
+public class MissionLoader
+{
+    public Location start_location;
+    public Location end_location;
+    public Location current_location;
+
+    public int facing;
+
+    public int grid_length_x;
+    public int grid_length_y;
+
+    public MissionLoader()
+    {
+        this.start_location = new Location();
+        this.end_location = new Location();
+        this.current_location = new Location();
+        this.LoadFile();
+        this.errorCheckFile();
+    }
+
+    public void LoadFile()
+    {
+        /** JSON FILE **/
+        // Hardcoded right now below// TODO Drew needs to impliment sim card reader
+        /* ******************************************************************* */
+        /* ******************************************************************* */
+        int startX = 4;
+        int startY = 1;
+        int endX = 2;
+        int endY = 4;
+        int grid_length_x = 10;
+        int grid_length_y = 10;
+        int facing = 0;           // 0=N,1=S,2=W,3=E
+        /* ******************************************************************* */
+        /* ******************************************************************* */
+
+        // TODO Drew
+        // Set these below private class member values here! once you have
+        // figured out how to get them from JSON file on SD card
+        this.start_location.setX(startX);
+        this.start_location.setY(startY);
+        this.end_location.setX(endX);
+        this.end_location.setY(endY);
+        this.current_location.setX(startX);
+        this.current_location.setY(startY);
+        this.facing = facing;
+        this.grid_length_x = grid_length_x;
+        this.grid_length_y = grid_length_y;
+    }
+
+    public boolean errorCheckFile()
+    {
+
+        // Invalid Json File Content Error 1 :
+        // Check for grid size being to small
+        if(this.grid_length_x < 2 || this.grid_length_y < 2)
+        {
+            return false;
+        }
+
+        // Invalid Json File Content Error 2 :
+        // Check for values out of range
+        if(this.start_location.getX() > this.grid_length_x ||
+           this.start_location.getY() > this.grid_length_y ||
+           this.end_location.getX()   > this.grid_length_x ||
+           this.end_location.getY()   > this.grid_length_y)
+        {
+            return false;
+        }
+
+        // Invalid Json File Content Error 3 :
+        // Check for start location is same as end location
+        if(this.start_location.getX() == this.end_location.getX() &&
+           this.start_location.getY() == this.end_location.getY())
+        {
+            return false;
+        }
+
+        // Return no errors
+        return true;
+    }
+}
