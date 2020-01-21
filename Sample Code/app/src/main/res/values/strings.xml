@@ -34,7 +34,7 @@
     <string name="component_listview_mobile_remote_controller">Mobile Remote Controller</string>
 
     <string name="component_listview_SUAS7_controller">SUAS7 Controller</string> <!-- SUAS 7 controller -->
-    <string name="component_listview_SUAS7_mobile_remote_controller">SUAS7 Mobile Remote Controller</string> <!-- SUAS 7 controller -->
+    <string name="component_listview_SUAS7_mobile_remote_controller">Control Screen</string> <!-- SUAS 7 controller -->
 
     <string name="component_listview_mission_manager">Mission Manager (Deprecated)</string>
     <string name="component_listview_timeline_mission_control">Timeline Mission Control</string>

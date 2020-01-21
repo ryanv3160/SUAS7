@@ -57,6 +57,7 @@
             android:layout_alignParentTop="true"
             android:layout_width="100dp"/>
 
+
         <Button
             android:id="@+id/btnSeek"
             android:layout_marginLeft="5dp"

@@ -86,7 +86,7 @@
         android:layout_centerHorizontal="true"
         android:layout_marginTop="25dp"
         android:background="@drawable/round_btn"
-        android:text="Connect/Continue"
+        android:text="CONTINUE"
         android:textAllCaps="false"
         android:textColor="@color/common_text_color"
         android:textSize="15dp"/>

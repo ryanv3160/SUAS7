@@ -15,6 +15,16 @@
 
 package com.dji.sdk.sample.Mission;
 
+import android.os.Environment;
+import android.widget.TextView;
+
+import com.dji.sdk.sample.R;
+
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileReader;
+import java.io.IOException;
+
 public class MissionLoader
 {
     public Location start_location;
@@ -41,10 +51,10 @@ public class MissionLoader
         // Hardcoded right now below// TODO Drew needs to impliment sim card reader
         /* ******************************************************************* */
         /* ******************************************************************* */
-        int startX = 4;
+        int startX = 2;
         int startY = 1;
         int endX = 2;
-        int endY = 4;
+        int endY = 3;
         int grid_length_x = 10;
         int grid_length_y = 10;
         int facing = 0;           // 0=N,1=S,2=W,3=E
@@ -95,5 +105,41 @@ public class MissionLoader
 
         // Return no errors
         return true;
+    }
+
+    public void readSDCard()
+    {
+        //Find the directory for the SD Card
+        File sdcard = Environment.getExternalStorageDirectory();
+
+        //Currently reading from text file
+        //Change to JSON File format
+        //Get the JSON file
+        File file = new File(sdcard,"mission.txt");
+
+        //Read text from file
+        StringBuilder text;
+        text = new StringBuilder();
+
+        try
+        {
+            BufferedReader br = new BufferedReader(new FileReader(file));
+            String line;
+
+            while ((line = br.readLine()) != null)
+            {
+                /*** In here read file into class member variables ***/
+                text.append(line);
+                text.append('\n');
+            }
+            br.close();
+
+            /*** You can use this spot to print to the phone the content of the json file to
+                 test if we can read from the SD card or not ***/
+        }
+        catch (IOException e)
+        {
+            //Add error checking for file not found ..etc
+        }
     }
 }

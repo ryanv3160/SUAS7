@@ -16,14 +16,31 @@ import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
 import com.dji.sdk.sample.R;
+import com.dji.sdk.sample.internal.controller.DJISampleApplication;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
+import com.dji.sdk.sample.internal.utils.Helper;
+import com.dji.sdk.sample.internal.utils.ModuleVerificationUtil;
+import com.dji.sdk.sample.internal.utils.VideoFeedView;
 import com.dji.sdk.sample.internal.view.PresentableView;
 import com.dji.sdk.sample.Mission.Mission;
+
+import java.util.Locale;
+
+import dji.common.battery.BatteryState;
 import dji.common.error.DJIError;
+import dji.common.flightcontroller.FlightControllerState;
+import dji.common.flightcontroller.ObstacleDetectionSector;
+import dji.common.flightcontroller.VisionDetectionState;
+import dji.common.flightcontroller.VisionSensorPosition;
 import dji.common.util.CommonCallbacks;
+import dji.sdk.battery.Battery;
+import dji.sdk.camera.VideoFeeder;
+import dji.sdk.flightcontroller.Compass;
+import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
-
-
+import dji.sdk.mission.timeline.actions.TakeOffAction;
+import dji.sdk.products.Aircraft;
+import dji.sdk.sdkmanager.LiveStreamManager;
 
 
 /*********************************************************************************************************
@@ -38,11 +55,32 @@ public class RemoteControllerSuas7 extends RelativeLayout
     // Button to make drone land
     private Button autoLand;
 
-    // For pop-up window
-    private TextView textView;
+    private Button btnReturnHome;
+
+    private boolean obstacleInFront;
+
+
+    private TextView textViewLat;
+    private TextView textViewLong;
+    private TextView textViewAlt;
+    private TextView textViewHeading;
+    private TextView textViewBattery;
+
+    private TextView textViewObstacleF;
+
+    private Compass compass;
 
     // Mission to be flown
     private Mission mission;
+
+    private VideoFeedView primaryVideoFeedView;
+    private VideoFeedView fpvVideoFeedView;
+
+    private LiveStreamManager.OnLiveChangeListener listener;
+    private LiveStreamManager.LiveStreamVideoSource currentVideoSource = LiveStreamManager.LiveStreamVideoSource.Primary;
+
+
+
 
 
 
@@ -71,7 +109,8 @@ public class RemoteControllerSuas7 extends RelativeLayout
     @Override
     public String getHint()
     {
-        return this.getClass().getSimpleName() + ".java";
+        //return this.getClass().getSimpleName() + ".java";
+        return "This is the control screen. Press [Start Mission] to execute flioght plan";
     }
 
 
@@ -88,6 +127,102 @@ public class RemoteControllerSuas7 extends RelativeLayout
         // Super class constructor
         super.onAttachedToWindow();
 
+        this.compass = ((Aircraft) DJISampleApplication.getProductInstance()).getFlightController().getCompass();
+
+        if (ModuleVerificationUtil.isFlightControllerAvailable())
+        {
+            FlightController flightController =
+                    ((Aircraft) DJISampleApplication.getProductInstance()).getFlightController();
+
+
+            flightController.setStateCallback(new FlightControllerState.Callback() {
+                @Override
+                public void onUpdate(@NonNull FlightControllerState djiFlightControllerCurrentState) {
+                    if (null != compass)
+                    {
+                        String s = String.format(Locale.ENGLISH, "HEADING :  %.4f", compass.getHeading());
+                        changeDescriptionHeading(s);
+                    }
+                }
+            });
+            if (ModuleVerificationUtil.isCompassAvailable()) {
+                compass = flightController.getCompass();
+            }
+
+
+            /** Obstacle detection **/
+            FlightAssistant intelligentFlightAssistant = flightController.getFlightAssistant();
+
+            if (intelligentFlightAssistant != null) {
+
+                intelligentFlightAssistant.setVisionDetectionStateUpdatedCallback(new VisionDetectionState.Callback() {
+                    @Override
+                    public void onUpdate(@NonNull VisionDetectionState visionDetectionState)
+                    {
+                        StringBuilder stringBuilder = new StringBuilder();
+
+                        ObstacleDetectionSector[] visionDetectionSectorArray =
+                                visionDetectionState.getDetectionSectors();
+
+                        if(visionDetectionState.getPosition() == VisionSensorPosition.NOSE)
+                        {
+                            float distance_meters = visionDetectionSectorArray[2].getObstacleDistanceInMeters();
+
+                            stringBuilder.append("FWD Obstacle distance: ")
+                                    .append(visionDetectionSectorArray[2].getObstacleDistanceInMeters())
+                                    .append("\n");
+
+                            if(distance_meters < 0.60f)
+                            {
+                                stringBuilder.append("\n")
+                                        .append("*WARNING OBSTACLE FRONT*")
+                                        .append("\n")
+                                        .append("Collision Avoidance Engaged")
+                                        .append("\n");
+                                obstacleInFront = true;
+                            }
+                            else
+                            {
+                                obstacleInFront = false;
+                            }
+
+                            changeDescriptionObstacleF(stringBuilder.toString());
+                        }
+                        /*
+                        if(visionDetectionState.getPosition() == VisionSensorPosition.TAIL)
+                        {
+                            stringBuilder.append("AFT Obstacle distance: ")
+                                    .append(visionDetectionSectorArray[1].getObstacleDistanceInMeters())
+                                    .append("\n");
+
+                            changeDescriptionObstacleA(stringBuilder.toString());
+                        }
+                        */
+
+
+                    }
+                });
+            }
+        }
+
+
+
+        try
+        {
+            DJISampleApplication.getProductInstance().getBattery().setStateCallback(new BatteryState.Callback() {
+                @Override
+                public void onUpdate(BatteryState djiBatteryState)
+                {
+                    String s = String.format(Locale.ENGLISH, "BATTERY : %d", djiBatteryState.getChargeRemainingInPercent());
+                    changeDescriptionBattery(s);
+                }
+            });
+        } catch (Exception ignored) {
+
+        }
+
+
+
     }
 
 
@@ -102,6 +237,7 @@ public class RemoteControllerSuas7 extends RelativeLayout
     protected void onDetachedFromWindow()
     {
         super.onDetachedFromWindow();
+
     }
 
 
@@ -119,6 +255,7 @@ public class RemoteControllerSuas7 extends RelativeLayout
         LayoutInflater layoutInflater = (LayoutInflater) context.getSystemService(Service.LAYOUT_INFLATER_SERVICE);
         layoutInflater.inflate(R.layout.view_mobile_rc, this, true);
         initUI();
+
     }
 
 
@@ -127,15 +264,37 @@ public class RemoteControllerSuas7 extends RelativeLayout
      * Purpose: Intitialize the GUI buttons, so that on action they run appropriate signal handler in switch
      * Input: None
      * Returns: Nothing
-     * Notes: 2 buttons and message window
+     * Notes:
      *********************************************************************************************************/
     private void initUI()
     {
         btnTakeOff = (Button) findViewById(R.id.btn_take_off);
         btnTakeOff.setOnClickListener(this);
+
         autoLand = (Button) findViewById(R.id.btn_auto_land);
         autoLand.setOnClickListener(this);
-        textView = (TextView) findViewById(R.id.textview_simulator);
+
+        btnReturnHome = (Button) findViewById(R.id.btn_return_home);
+        btnTakeOff.setOnClickListener(this);
+
+        textViewLat = (TextView) findViewById(R.id.textview_lat);
+        textViewLong = (TextView) findViewById(R.id.textview_long);
+        textViewAlt = (TextView) findViewById(R.id.textview_alt);
+        textViewHeading = (TextView) findViewById(R.id.textview_heading);
+        textViewBattery = (TextView) findViewById(R.id.textview_bat);
+        textViewObstacleF = (TextView) findViewById(R.id.textview_obstacle_f);
+
+        setClickable(true);
+
+        primaryVideoFeedView = (VideoFeedView) findViewById(R.id.video_view_primary_video_feed);
+        primaryVideoFeedView.registerLiveVideo(VideoFeeder.getInstance().getPrimaryVideoFeed(), true);
+
+        fpvVideoFeedView = (VideoFeedView) findViewById(R.id.video_view_fpv_video_feed);
+        fpvVideoFeedView.registerLiveVideo(VideoFeeder.getInstance().getSecondaryVideoFeed(), false);
+        if (Helper.isMultiStreamPlatform())
+        {
+            fpvVideoFeedView.setVisibility(VISIBLE);
+        }
     }
 
 
@@ -159,10 +318,32 @@ public class RemoteControllerSuas7 extends RelativeLayout
                 /**---------------------------------------**/
                 /** Here execute the mission provided     **/
                 /**---------------------------------------**/
-                mission.executeMission();
+                //mission.executeMission();
+
+                mission.mission_control.unscheduleEverything();
+                mission.mission_control.scheduleElement(new TakeOffAction());
+                while(!mission.arrival())
+                {
+                    mission.navigationAlgorithm();
+                    mission.mission_control.startTimeline();
+                    while(mission.mission_control.isTimelineRunning())
+                    {
+                        if(obstacleInFront)
+                        {
+                            mission.mission_control.stopTimeline();
+                            mission.mission_control.unscheduleEverything();
+                            //Back up physically
+                            //Update Grid Position
+                            //Execute Avoidance
+                        }
+                    }
+                }
 
                 // Land button was pressed
             case R.id.btn_auto_land:
+                break;
+
+            case R.id.btn_return_home:
                 break;
 
             // Default case currently does nothing
@@ -182,7 +363,8 @@ public class RemoteControllerSuas7 extends RelativeLayout
     @Override
     public int getDescription()
     {
-        return R.string.component_listview_mobile_remote_controller;
+        return R.string.component_listview_SUAS7_mobile_remote_controller;
+
     }
 
 
@@ -224,6 +406,37 @@ public class RemoteControllerSuas7 extends RelativeLayout
             }
         });
     }
+
+    protected void changeDescriptionHeading(final String newDescription)
+    {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                textViewHeading.setText(newDescription);
+            }
+        });
+    }
+
+    protected void changeDescriptionBattery(final String newDescription)
+    {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                textViewBattery.setText(newDescription);
+            }
+        });
+    }
+
+    protected void changeDescriptionObstacleF(final String newDescription)
+    {
+        post(new Runnable() {
+            @Override
+            public void run() {
+                textViewObstacleF.setText(newDescription);
+            }
+        });
+    }
+
 
 
 }//Class
