@@ -318,8 +318,9 @@ public class RemoteControllerSuas7 extends RelativeLayout
                 /**---------------------------------------**/
                 /** Here execute the mission provided     **/
                 /**---------------------------------------**/
-                //mission.executeMission();
+                mission.executeMission();
 
+                /*
                 mission.mission_control.unscheduleEverything();
                 mission.mission_control.scheduleElement(new TakeOffAction());
                 while(!mission.arrival())
@@ -338,6 +339,8 @@ public class RemoteControllerSuas7 extends RelativeLayout
                         }
                     }
                 }
+                */
+
 
                 // Land button was pressed
             case R.id.btn_auto_land:
