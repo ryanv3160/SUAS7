@@ -309,9 +309,14 @@ public class RemoteControllerSuas7 extends RelativeLayout
     @Override
     public void onClick(View v)
     {
+
         // Switch off of the button pressed
         switch (v.getId())
         {
+            // Land button was pressed
+            case R.id.btn_auto_land:
+                //mission.emergencyLand();
+                break;
             // Take off button was pressed
             // Also considered the start mission.
             case R.id.btn_take_off:
@@ -342,10 +347,6 @@ public class RemoteControllerSuas7 extends RelativeLayout
                 }
                 */
 
-
-                // Land button was pressed
-            case R.id.btn_auto_land:
-                break;
 
             case R.id.btn_return_home:
                 break;
