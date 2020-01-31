@@ -20,6 +20,8 @@ import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
 import dji.sdk.mission.timeline.actions.LandAction;
+import dji.sdk.mission.timeline.triggers.AircraftLandedTrigger;
+
 import dji.sdk.mission.timeline.actions.TakeOffAction;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
@@ -87,14 +89,14 @@ public class Mission
             //test10();
 
             // Build the test queue to be scheduled to fly to target
-            //TestPlans test_plan = new TestPlans(mission_control);
+            TestPlans test_plan = new TestPlans(mission_control);
             //test_plan.test1();
             //test_plan.test2();
             //test_plan.test3();
             //test_plan.test4();
             //test_plan.test5();
             //test_plan.test6();
-            //test_plan.test7();
+            test_plan.test7();
             //test_plan.test8();
             //test_plan.testRelease2Demo();
 
@@ -365,6 +367,15 @@ public class Mission
             }
             return false;
         }
+
+        public void emergencyLand()
+        {
+            mission_control.stopTimeline();
+            mission_control.unscheduleEverything();
+            mission_control.scheduleElement(new LandAction());
+            mission_control.resumeTimeline();
+        }
+
 }
 
 
