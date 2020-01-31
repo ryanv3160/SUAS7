@@ -252,7 +252,7 @@ public class Mission
             return false;
         }
 
-<<<<<<< HEAD
+
 
 
 
@@ -578,7 +578,6 @@ public class Mission
         }
 
 
-=======
         public void emergencyLand()
         {
             mission_control.stopTimeline();
@@ -586,8 +585,6 @@ public class Mission
             mission_control.scheduleElement(new LandAction());
             mission_control.resumeTimeline();
         }
-
->>>>>>> 2033842261723abf157384bffd04c46aa37c9eff
 }
 
 
