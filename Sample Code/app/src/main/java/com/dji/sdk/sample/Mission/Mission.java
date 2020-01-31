@@ -50,6 +50,9 @@ public class Mission
         private int west  = 2;
         private int east  = 3;
 
+        private int facing = 0; // 0=N,1=S,2=W,3=E
+        private float obstacleDistanceValue = 0;
+
 
         public Mission()
         {
@@ -99,134 +102,15 @@ public class Mission
             //test_plan.testRelease2Demo();
 
             this.flyToTarget();
-        }
-
-
-        public boolean navigationAlgorithm()
-        {
-            /** Move Left on the grid **/ /** West : W **/
-            if (this.mission_loader.current_location.getX() > this.mission_loader.end_location.getX())
-            {
-                if(this.mission_loader.facing != this.west)
-                {
-                    switch (this.mission_loader.facing)
-                    {
-                        //Facing North
-                        case 0:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            break;
-                        //Facing South
-                        case 1:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
-                            break;
-                        //Facing East
-                        case 3:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            mission_control.scheduleElement(new FlightDirection(1, this.hover));
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            break;
-                    }
-                    this.mission_loader.facing = this.west;
-                }
-                mission_control.scheduleElement(new FlightDirection(2, this.forward));
-                mission_loader.current_location.setX(mission_loader.current_location.getX() - 1);
-            }
-            /** Move Right on the grid **/ /** East : E **/
-            else if(this.mission_loader.end_location.getX() > this.mission_loader.current_location.getX())
-            {
-                if(this.mission_loader.facing != this.east)
-                {
-                    switch (this.mission_loader.facing)
-                    {
-                        //Facing North
-                        case 0:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
-                            break;
-                        //Facing South
-                        case 1:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            break;
-                        //Facing West
-                        case 3:
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            mission_control.scheduleElement(new FlightDirection(1, this.hover));
-                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                            break;
-                    }
-                    this.mission_loader.facing = this.east;
-                }
-                mission_control.scheduleElement(new FlightDirection(2, this.forward));
-                mission_loader.current_location.setX(mission_loader.current_location.getX() + 1);
-            }
-            /** Move Up and Down on the grid **/ /** North : N and South : S **/
-            else if(this.mission_loader.end_location.getX() == this.mission_loader.current_location.getX())
-            {
-                /** Move Up on the grid **/ /** North : N **/
-                if (this.mission_loader.current_location.getY() < this.mission_loader.end_location.getY())
-                {
-                    if(this.mission_loader.facing != this.north)
-                    {
-                        switch (this.mission_loader.facing)
-                        {
-                            //Facing South
-                            case 1:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                mission_control.scheduleElement(new FlightDirection(1, this.hover));
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                break;
-                            //Facing West
-                            case 2:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
-                                break;
-                            //Facing East
-                            case 3:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                break;
-                        }
-                        this.mission_loader.facing = this.north;
-                    }
-                    mission_control.scheduleElement(new FlightDirection(2, this.forward));
-                    mission_loader.current_location.setY(mission_loader.current_location.getY() + 1);
-                }
-                /** Move Down on the grid **/ /** South : S **/
-                else if(this.mission_loader.current_location.getY() > this.mission_loader.end_location.getY())
-                {
-                    if(this.mission_loader.facing != this.south)
-                    {
-                        switch (this.mission_loader.facing)
-                        {
-                            //Facing North
-                            case 0:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                mission_control.scheduleElement(new FlightDirection(1, this.hover));
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                break;
-                            //Facing West
-                            case 2:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
-                                break;
-                            //Facing East
-                            case 3:
-                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
-                                break;
-                        }
-                        this.mission_loader.facing = this.south;
-                    }
-                    mission_control.scheduleElement(new FlightDirection(2, this.forward));
-                    mission_loader.current_location.setY(mission_loader.current_location.getY() - 1);
-                }
-
-            }
-            return true;
+            //this.betaObstacleAvoidance();
         }
 
 
 
-
-// 0=N,1=S,2=W,3=E
-// Forward = 0 : Backward = 1 : Slide Left  = 2 : Slide Right  = 3
-// Down    = 4 : UP       = 5 : Rotate Left = 6 : Rotate Right = 7
-// Hover   = 8
+        // 0=N,1=S,2=W,3=E
+        // Forward = 0 : Backward = 1 : Slide Left  = 2 : Slide Right  = 3
+        // Down    = 4 : UP       = 5 : Rotate Left = 6 : Rotate Right = 7
+        // Hover   = 8
 
         public void flyToTarget()
         {
@@ -365,6 +249,332 @@ public class Mission
             }
             return false;
         }
+
+
+
+
+        public int navigationAlgorithm1()
+        {
+            /** Move Left on the grid **/ /** West : W **/
+            // return 0
+            if (this.mission_loader.current_location.getX() > this.mission_loader.end_location.getX())
+            {
+                if(this.mission_loader.facing != this.west)
+                {
+                    switch (this.mission_loader.facing)
+                    {
+                        //Facing North
+                        case 0:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            updateFacingValueLeft();
+                            break;
+                        //Facing South
+                        case 1:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+                            updateFacingValueRight();
+                            break;
+                        //Facing East
+                        case 3:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            mission_control.scheduleElement(new FlightDirection(1, this.hover));
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            updateFacingValue180();
+                            break;
+                    }
+                    this.mission_loader.facing = this.west;
+                }
+                return 0;
+            }
+
+            /** Move Right on the grid **/ /** East : E **/
+            // return 1
+            else if(this.mission_loader.end_location.getX() > this.mission_loader.current_location.getX())
+            {
+                if(this.mission_loader.facing != this.east)
+                {
+                    switch (this.mission_loader.facing)
+                    {
+                        //Facing North
+                        case 0:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+                            updateFacingValueRight();
+                            break;
+                        //Facing South
+                        case 1:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            updateFacingValueLeft();
+                            break;
+                        //Facing West
+                        case 3:
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            mission_control.scheduleElement(new FlightDirection(1, this.hover));
+                            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                            updateFacingValue180();
+                            break;
+                    }
+                    this.mission_loader.facing = this.east;
+                }
+                return 1;
+            }
+            /** Move Up and Down on the grid **/ /** North : N and South : S **/
+            else if(this.mission_loader.end_location.getX() == this.mission_loader.current_location.getX())
+            {
+                /** Move Up on the grid **/ /** North : N **/
+                if (this.mission_loader.current_location.getY() < this.mission_loader.end_location.getY())
+                {
+                    if(this.mission_loader.facing != this.north)
+                    {
+                        switch (this.mission_loader.facing)
+                        {
+                            //Facing South
+                            case 1:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                mission_control.scheduleElement(new FlightDirection(1, this.hover));
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                updateFacingValue180();
+                                break;
+                            //Facing West
+                            case 2:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+                                updateFacingValueRight();
+                                break;
+                            //Facing East
+                            case 3:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                updateFacingValueLeft();
+                                break;
+                        }
+                        this.mission_loader.facing = this.north;
+                    }
+                    return 2;
+                }
+                /** Move Down on the grid **/ /** South : S **/
+                //
+                else if(this.mission_loader.current_location.getY() > this.mission_loader.end_location.getY())
+                {
+                    if(this.mission_loader.facing != this.south)
+                    {
+                        switch (this.mission_loader.facing)
+                        {
+                            //Facing North
+                            case 0:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                mission_control.scheduleElement(new FlightDirection(1, this.hover));
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                updateFacingValue180();
+                                break;
+                            //Facing West
+                            case 2:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+                                updateFacingValueLeft();
+                                break;
+                            //Facing East
+                            case 3:
+                                mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+                                updateFacingValueRight();
+                                break;
+                        }
+                        this.mission_loader.facing = this.south;
+                    }
+                    return 3;
+                }
+            }
+            return 4;
+        }
+
+        public void betaObstacleAvoidance()
+        {
+            mission_control.unscheduleEverything();
+            mission_control.scheduleElement(new TakeOffAction());
+
+            while(!arrival())
+            {
+                /** This is crucial to wait for the cleared command that is executing finishes
+                 * We dont want to look at the distance sensor value until th drone is actually in the
+                 * spot realtime after the command is issued **/
+                while(mission_control.isTimelineRunning())
+                { }
+
+                /** This is crucial also to perform the facing movement ie "turning" before looking
+                 * at the distance sensor value for obvious reasons **/
+                int travelDirection = navigationAlgorithm1();
+
+                // If there is no obstacle in-front of us we are cleared to move forward
+                if(this.obstacleDistanceValue > 0.60f)
+                {
+                    switch(travelDirection)
+                    {
+                        case 0:
+                            //0:West
+                            mission_control.scheduleElement(new FlightDirection(2, this.forward));
+                            mission_loader.current_location.setX(mission_loader.current_location.getX() - 1);
+                            break;
+
+                        case 1:
+                            //1:East
+                            mission_control.scheduleElement(new FlightDirection(2, this.forward));
+                            mission_loader.current_location.setX(mission_loader.current_location.getX() + 1);
+                            break;
+
+                        case 2:
+                            //2:North
+                            mission_control.scheduleElement(new FlightDirection(2, this.forward));
+                            mission_loader.current_location.setY(mission_loader.current_location.getY() + 1);
+                            break;
+
+                        case 3:
+                            //3:South
+                            mission_control.scheduleElement(new FlightDirection(2, this.forward));
+                            mission_loader.current_location.setY(mission_loader.current_location.getY() - 1);
+                            break;
+
+                        case 4:
+                            //Error case
+                            break;
+                    }
+                }
+                // We have detected an obstacle now allow the obstacle avoidance handler to take over
+                else
+                {
+                    //TODO: Eventually put a conditional in here for at this grid coordinate we tried this already..
+                    // between left and right avoidance.
+                    leftAvoidance();
+                }
+            }
+        }
+
+        public void setObstacleDistance(float distance)
+        {
+            this.obstacleDistanceValue = distance;
+        }
+
+        public float getObstacleDistance()
+        {
+            return this.obstacleDistanceValue;
+        }
+
+        public void leftAvoidance()
+        {
+            mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+            mission_control.scheduleElement(new FlightDirection(1, this.hover));
+            updateFacingValueLeft();
+
+            /** This is crucial to wait for the cleared command that is executing finishes
+             * We dont want to look at the distance sensor value until th drone is actually in the
+             * spot realtime after the command is issued **/
+            //Blocking
+            while(mission_control.isTimelineRunning()) { }
+
+            if(this.obstacleDistanceValue > 0.60f) //TODO Eventually add if within grid boundaries
+            {
+                switch(facing)
+                {
+                    case 0:
+                        //0:West
+                        mission_loader.current_location.setX(mission_loader.current_location.getX() - 1);
+                        break;
+
+                    case 1:
+                        //1:East
+                        mission_loader.current_location.setX(mission_loader.current_location.getX() + 1);
+                        break;
+
+                    case 2:
+                        //2:North
+                        mission_loader.current_location.setY(mission_loader.current_location.getY() + 1);
+                        break;
+
+                    case 3:
+                        //3:South
+                        mission_loader.current_location.setY(mission_loader.current_location.getY() - 1);
+                        break;
+
+                    case 4:
+                        //Error case
+                        break;
+                }
+                mission_control.scheduleElement(new FlightDirection(2, this.forward));
+            }
+            else
+            {
+                leftAvoidance();
+            }
+
+        }
+
+        // 0=N,1=S,2=W,3=E
+        public void updateFacingValueLeft()
+        {
+            //Update facing value
+            switch (facing)
+            {
+                case 0:
+                    facing = 2;
+                    break;
+
+                case 1:
+                    facing = 3;
+                    break;
+
+                case 2:
+                    facing = 1;
+                    break;
+
+                case 3:
+                    facing = 0;
+                    break;
+            }
+        }
+
+        // 0=N,1=S,2=W,3=E
+        public void updateFacingValueRight()
+        {
+            //Update facing value
+            switch (facing)
+            {
+                case 0:
+                    facing = 3;
+                    break;
+
+                case 1:
+                    facing = 2;
+                    break;
+
+                case 2:
+                    facing = 0;
+                    break;
+
+                case 3:
+                    facing = 1;
+                    break;
+            }
+        }
+
+        // 0=N,1=S,2=W,3=E
+        public void updateFacingValue180()
+        {
+            //Update facing value
+            switch (facing)
+            {
+                case 0:
+                    facing = 1;
+                    break;
+
+                case 1:
+                    facing = 0;
+                    break;
+
+                case 2:
+                    facing = 3;
+                    break;
+
+                case 3:
+                    facing = 2;
+                    break;
+            }
+        }
+
+
 }
 
 

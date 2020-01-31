@@ -171,6 +171,7 @@ public class RemoteControllerSuas7 extends RelativeLayout
                             stringBuilder.append("FWD Obstacle distance: ")
                                     .append(visionDetectionSectorArray[2].getObstacleDistanceInMeters())
                                     .append("\n");
+                            mission.setObstacleDistance(distance_meters);
 
                             if(distance_meters < 0.60f)
                             {

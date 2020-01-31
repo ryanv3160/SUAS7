@@ -28,6 +28,7 @@ public class FlightDirection extends TimelineElement
 
     /**  Velocity input values for all flight orientations  **/
     /**  Range for all is ( -1.0f , 1.0f )                  **/
+    /**  These values worked well for correct 90 Degree Turns and Fwd movements of 1 foot **/
     private float yaw_left_velocity        = -0.9f;
     private float yaw_right_velocity       =  0.9f;
     private float pitch_forward_velocity   =  0.1f;
@@ -148,12 +149,19 @@ public class FlightDirection extends TimelineElement
                 break;
         }
 
-        // Wait until the timed delay has expired
+        // Hold the flight controls in this position for the set delay
         SystemClock.sleep(this.DirectionDelay);
+        // Set the controls to neutral, This will cause the brief hover in place
         FlightDirection.this.stop();
 
     }
 
+    /*********************************************************************************************************
+     * Name: stop()
+     * Purpose: This function is the intermidiary command inbetween drone direction movements.
+     * The drone currently moves in a grid like pattern traveling along the X and Y axis of the plane.
+     * This is neccessary inbetween commands 
+     *********************************************************************************************************/
     @Override
     public void stop()
     {
