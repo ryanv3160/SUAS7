@@ -577,6 +577,45 @@ public class Mission
             }
         }
 
+        public int calculateRotation()
+        {
+            int turn = 0;
+
+            switch(facing)
+            {
+                case 0:
+                    return turn = facingPosY();
+
+                case 1:
+                    return turn = facingNegY();
+
+                case 2:
+                    return turn = facingPosX();
+
+                case 3:
+                    return turn = facingNegX();
+            }
+            return turn;
+        }
+
+        public int facingPosY()
+        {
+            
+        }
+        public int facingNegY()
+        {
+
+        }
+
+        public int facingPosX()
+        {
+
+        }
+        public int facingPosY()
+        {
+
+        }
+
 
         public void emergencyLand()
         {
