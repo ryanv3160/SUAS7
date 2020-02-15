@@ -108,17 +108,13 @@ public class MainContent extends RelativeLayout {
         });
         mBtnBluetooth.setOnClickListener(new OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (GeneralUtils.isFastDoubleClick()) {
+            public void onClick(View v)
+            {
+                if (GeneralUtils.isFastDoubleClick())
+                {
                     return;
                 }
-                if (DJISampleApplication.getBluetoothProductConnector() == null) {
-                    ToastUtils.setResultToToast("pls wait the sdk initiation finished");
-                    return;
-                }
-                bluetoothView =
-                    new ViewWrapper(new BluetoothView(getContext()), R.string.component_listview_bluetooth);
-                DJISampleApplication.getEventBus().post(bluetoothView);
+                // TODO: Drew , tie this button to reading from the json file
             }
         });
         mBridgeModeEditText.setOnEditorActionListener(new TextView.OnEditorActionListener() {

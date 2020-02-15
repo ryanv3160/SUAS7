@@ -51,9 +51,9 @@ public class MissionLoader
         // Hardcoded right now below// TODO Drew needs to impliment sim card reader
         /* ******************************************************************* */
         /* ******************************************************************* */
-        int startX = 2;
+        int startX = 1;
         int startY = 1;
-        int endX = 2;
+        int endX = 4;
         int endY = 3;
         int grid_length_x = 10;
         int grid_length_y = 10;
