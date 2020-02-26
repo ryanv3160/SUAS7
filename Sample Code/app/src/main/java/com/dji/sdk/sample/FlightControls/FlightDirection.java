@@ -17,6 +17,7 @@ import dji.sdk.mission.MissionControl;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mobilerc.MobileRemoteController;
 import dji.sdk.sdkmanager.DJISDKManager;
+//test
 
 
 public class FlightDirection extends TimelineElement
