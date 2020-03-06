@@ -15,6 +15,8 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
+
+//import com.dji.sdk.sample.Map.Obstacle;
 import com.dji.sdk.sample.R;
 import com.dji.sdk.sample.internal.controller.DJISampleApplication;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
@@ -58,6 +60,9 @@ public class RemoteControllerSuas7 extends RelativeLayout
     private Button btnReturnHome;
 
     private boolean obstacleInFront;
+
+
+    private boolean startMission;
 
 
     private TextView textViewLat;
@@ -171,7 +176,6 @@ public class RemoteControllerSuas7 extends RelativeLayout
                             stringBuilder.append("FWD Obstacle distance: ")
                                     .append(visionDetectionSectorArray[2].getObstacleDistanceInMeters())
                                     .append("\n");
-                            mission.setObstacleDistance(distance_meters);
 
                             if(distance_meters < 0.60f)
                             {
@@ -181,10 +185,14 @@ public class RemoteControllerSuas7 extends RelativeLayout
                                         .append("Collision Avoidance Engaged")
                                         .append("\n");
                                 obstacleInFront = true;
+                                mission.obstacle = true;
+
                             }
                             else
                             {
                                 obstacleInFront = false;
+                                mission.obstacle = true;
+
                             }
 
                             changeDescriptionObstacleF(stringBuilder.toString());
@@ -315,12 +323,13 @@ public class RemoteControllerSuas7 extends RelativeLayout
         {
             // Land button was pressed
             case R.id.btn_auto_land:
-                //mission.emergencyLand();
+                mission.emergencyLand();
                 break;
             // Take off button was pressed
             // Also considered the start mission.
             case R.id.btn_take_off:
 
+                startMission = true;
                 /**---------------------------------------**/
                 /** Here execute the mission provided     **/
                 /**---------------------------------------**/
