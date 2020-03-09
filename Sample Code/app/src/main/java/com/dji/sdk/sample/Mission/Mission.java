@@ -17,12 +17,14 @@ import dji.common.flightcontroller.VisionDetectionState;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
 import dji.sdk.mission.MissionControl;
+import dji.sdk.mission.Triggerable;
 import dji.sdk.mission.timeline.TimelineElement;
 import dji.sdk.mission.timeline.TimelineEvent;
 import dji.sdk.mission.timeline.actions.LandAction;
 import dji.sdk.mission.timeline.triggers.AircraftLandedTrigger;
 
 import dji.sdk.mission.timeline.actions.TakeOffAction;
+import dji.sdk.mission.timeline.triggers.TriggerEvent;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.DJISDKManager;
 import com.dji.sdk.sample.FlightControls.FlightDirection;
@@ -31,6 +33,7 @@ public class Mission
 {
 
     public MissionControl mission_control;
+   // public ;
     private FlightController flight_controller;
     private FlightAssistant flight_assistant;
 
@@ -57,7 +60,10 @@ public class Mission
     // True = Left Avoidance / False = Right Avoidance
     private boolean avoidanceDirection = true;
 
-
+    private void addObstacleAvoidanceTrigger(Triggerable triggerTarget) {
+        float value = 20f;//distance threshold value
+        //ObstacleAvoidanceTrigger Trigger = new ObstacleAvoidanceTrigger();
+    }
     public Mission()
     {
         this.grid = new Grid(10,10);
@@ -105,8 +111,9 @@ public class Mission
         //test_plan.test8();
         //test_plan.testRelease2Demo();
 
-        //this.flyToTarget();
-        this.navigationAlgorithm();
+        this.flyToTarget();
+        //this.navigationAlgorithm();
+        //this.betaNavigation();
         mission_control.scheduleElement(new LandAction());
         mission_control.startTimeline();
     }
@@ -118,14 +125,17 @@ public class Mission
 
         // -------------------- Drone Take-Off -------------------- //
         mission_control.scheduleElement(new TakeOffAction());
-        mission_control.startTimeline();
-        waitForManuever();
+        //mission_control.startTimeline();
+        //waitForManuever();
         // -------------------------------------------------------- //
-
+       // mission_control.addListener();
         //## DRONE PHASE FLAG : Hover  ##//
 
         facePositiveY();
-
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.startTimeline();
+        waitForManuever();
+        mission_loader.current_location.setY(mission_loader.current_location.getY() + 1);
         //## DRONE PHASE FLAG : Hover & Facing POS Y  ##//
 
         // We have not reached the target Yet! Keep making moves
@@ -134,14 +144,17 @@ public class Mission
             // We detected an obstacle
             if(obstacle)
             {
-                if(leftAvoidance())
+                mission_control.scheduleElement(new LandAction());
+                mission_control.startTimeline();
+                waitForManuever();
+               /* if(leftAvoidance())
                 {
 
                 }
                 else
                 {
                     rightAvoidance();
-                }
+                }*/
             }
             else
             {
@@ -489,7 +502,34 @@ public class Mission
         }
         return false;
     }
+    public void Avoidance()
+    {
+        mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(1, this.rotate_right));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        mission_control.scheduleElement(new FlightDirection(2, this.forward));
+        mission_control.scheduleElement(new FlightDirection(1, this.hover));
+        //update grid position
+        //call navigation algorithm again
+        //this.flyToTarget();
+        //possibly exclude the last two lines
+        mission_control.scheduleElement(new LandAction());
+        mission_control.startTimeline();
 
+    }
     public boolean leftAvoidance()
     {
         mission_control.scheduleElement(new FlightDirection(1, this.rotate_left));
@@ -684,7 +724,7 @@ public class Mission
         mission_control.stopTimeline();
         mission_control.unscheduleEverything();
         mission_control.scheduleElement(new LandAction());
-        mission_control.resumeTimeline();
+        mission_control.startTimeline();
     }
 
 }

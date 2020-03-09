@@ -15,8 +15,6 @@ import android.widget.Button;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import androidx.annotation.NonNull;
-
-//import com.dji.sdk.sample.Map.Obstacle;
 import com.dji.sdk.sample.R;
 import com.dji.sdk.sample.internal.controller.DJISampleApplication;
 import com.dji.sdk.sample.internal.utils.DialogUtils;
@@ -40,6 +38,7 @@ import dji.sdk.camera.VideoFeeder;
 import dji.sdk.flightcontroller.Compass;
 import dji.sdk.flightcontroller.FlightAssistant;
 import dji.sdk.flightcontroller.FlightController;
+import dji.sdk.mission.timeline.actions.LandAction;
 import dji.sdk.mission.timeline.actions.TakeOffAction;
 import dji.sdk.products.Aircraft;
 import dji.sdk.sdkmanager.LiveStreamManager;
@@ -60,9 +59,6 @@ public class RemoteControllerSuas7 extends RelativeLayout
     private Button btnReturnHome;
 
     private boolean obstacleInFront;
-
-
-    private boolean startMission;
 
 
     private TextView textViewLat;
@@ -165,7 +161,6 @@ public class RemoteControllerSuas7 extends RelativeLayout
                     public void onUpdate(@NonNull VisionDetectionState visionDetectionState)
                     {
                         StringBuilder stringBuilder = new StringBuilder();
-
                         ObstacleDetectionSector[] visionDetectionSectorArray =
                                 visionDetectionState.getDetectionSectors();
 
@@ -185,14 +180,19 @@ public class RemoteControllerSuas7 extends RelativeLayout
                                         .append("Collision Avoidance Engaged")
                                         .append("\n");
                                 obstacleInFront = true;
-                                mission.obstacle = true;
-
+                                mission.mission_control.stopTimeline();
+                                mission.mission_control.unscheduleEverything();
+                                int i = mission.mission_control.scheduledCount();
+                                stringBuilder.append("count = ")
+                                        .append(i)
+                                        .append("\n");
+                                //mission.mission_control.scheduleElement(new LandAction());
+                                //mission.mission_control.startTimeline();
+                                mission.Avoidance();
                             }
                             else
                             {
                                 obstacleInFront = false;
-                                mission.obstacle = true;
-
                             }
 
                             changeDescriptionObstacleF(stringBuilder.toString());
@@ -329,17 +329,25 @@ public class RemoteControllerSuas7 extends RelativeLayout
             // Also considered the start mission.
             case R.id.btn_take_off:
 
-                startMission = true;
                 /**---------------------------------------**/
                 /** Here execute the mission provided     **/
                 /**---------------------------------------**/
                 mission.executeMission();
-
-                /*
-                mission.mission_control.unscheduleEverything();
-                mission.mission_control.scheduleElement(new TakeOffAction());
-                while(!mission.arrival())
+                if (obstacleInFront)
                 {
+                    //mission.mission_control.stopTimeline();
+                    //mission.mission_control.unscheduleEverything();
+                    //StringBuilder stringBuilder = new StringBuilder();
+                    //TESTING BLOCK
+                    //int i = mission.mission_control.scheduledCount();
+                    //stringBuilder.append("count = ")
+                      //      .append(i)
+                        //    .append("\n");
+                    //mission.mission_control.scheduleElement(new LandAction());
+                    //mission.mission_control.startTimeline();
+                    //
+                }
+                /*
                     mission.navigationAlgorithm();
                     mission.mission_control.startTimeline();
                     while(mission.mission_control.isTimelineRunning())

@@ -48,16 +48,16 @@ public class MissionLoader
     public void LoadFile()
     {
         /** JSON FILE **/
-        // Hardcoded right now below// TODO Drew needs to impliment file system reader
+        // Hardcoded right now below// TODO Drew needs to impliment sim card reader
         /* ******************************************************************* */
         /* ******************************************************************* */
-        int startX = 1;
-        int startY = 2;
-        int endX = 3;
-        int endY = 4;
+        int startX = 2;
+        int startY = 1;
+        int endX = 2;
+        int endY = 8;
         int grid_length_x = 10;
         int grid_length_y = 10;
-        int facing = 0;           // 0=N=Y+, 1=S=Y-, 2=W=X-, 3=E=X+
+        int facing = 0;           // 0=N,1=S,2=W,3=E
         /* ******************************************************************* */
         /* ******************************************************************* */
 
